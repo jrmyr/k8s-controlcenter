@@ -1,0 +1,24 @@
+#@data/values
+---
+
+#! Cannot use 'global' as it is a reserved word :-(
+general:
+  cmsBaseUrl: https://my-fileserver.net/partner/
+  environment:
+    name: undefined-env
+  registryBaseUrl: http://myregistry.net/services/
+
+product:
+  name: bike-parts-shop
+  shortcut: bps
+
+services:
+  frontend:
+    memory: 64M
+    version: undefined-version
+  orders:
+    memory: 128M
+    version: undefined-version
+  stock:
+    memory: 128M
+    version: undefined-version

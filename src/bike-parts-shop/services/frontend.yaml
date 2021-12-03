@@ -1,0 +1,13 @@
+#@ load("@ytt:data", "data")
+#@ load("@k8syaml:main.lib.yaml", "getClientLogoPath", "createService", "createDeployment")
+
+#@ serviceName = "frontend"
+
+#@ def getConfig():
+  #@yaml/text-templated-strings
+  serviceConfig: |
+      logoPath=(@= getClientLogoPath() @)
+#@ end
+
+--- #@ createService(serviceName, 8080)
+--- #@ createDeployment(serviceName, config=getConfig())

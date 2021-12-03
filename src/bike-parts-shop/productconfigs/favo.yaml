@@ -1,0 +1,17 @@
+#@data/values
+---
+
+product:
+  #@overlay/match missing_ok=True
+  partner:
+    name: FahrradVogel
+    shortcut: favo
+
+#@overlay/match missing_ok=True
+configs:
+  db:
+    user: FAVO
+    password: "my-not-really-secret-secret"
+    url: jdbc:postgresql://host:port/favo-db
+  logoPathSuffix: "vogel.png"
+  maxOrderAmount: 1000.00

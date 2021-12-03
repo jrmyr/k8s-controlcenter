@@ -1,0 +1,14 @@
+#@ load("@ytt:data", "data")
+#@ load("@k8syaml:main.lib.yaml", "createService", "createDeployment")
+
+#@ serviceName = "orders"
+
+#@ def getConfig():
+  #@yaml/text-templated-strings
+  serviceConfig: |
+      maximumAmountPerOrder=(@= str(data.values.configs.maxOrderAmount) @)
+      someOtherProp=someValue
+#@ end
+
+--- #@ createService(serviceName, 8080)
+--- #@ createDeployment(serviceName, config=getConfig(), withDb=True)

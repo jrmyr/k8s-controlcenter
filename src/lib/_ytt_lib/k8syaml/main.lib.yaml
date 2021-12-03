@@ -1,0 +1,111 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:template", "template")
+#@ load("common.lib.yaml", "getLabels", "isTestEnvironment", "isProdEnvironment", "namespace", "partnerShortcut")
+
+# Constants
+#@ CONFIG_VOLUME_NAME = "vlm-config"
+#@ CONFIG_FILE_DIR = "/app/config"
+#@ CONFIG_FILE_NAME = "config.properties"
+
+
+#@ def createService(serviceName, targetPort):
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: #@ serviceName
+    namespace: #@ namespace
+    labels: #@ getLabels()
+  spec:
+    selector:
+      app: #@ serviceName
+    ports:
+      - name: #@ serviceName + "-port"
+        targetPort: #@ targetPort
+        protocol: TCP
+        port: 80
+#@ end
+
+#@ def createDeployment(serviceName, config=None, withDb=False):
+  #@ serviceRelatedConfig = config["serviceConfig"] if config else ""
+
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: #@ "dpl-" + serviceName
+    namespace: #@ namespace
+    labels: #@ getLabels(app=serviceName)
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: #@ serviceName
+    template:
+      metadata:
+        labels: #@ getLabels(app=serviceName)
+        #@yaml/text-templated-strings
+        annotations:
+          _: #@ template.replace(a8rioAnnotations(serviceName))
+          composedServiceConfig: |
+              runtimeEnvironment=kubernetes
+              (@= '\n'.join(addDatabaseConnectionProperties(withDb)['elementList']) + '\n' if withDb else '' -@)
+              (@= serviceRelatedConfig -@)
+      spec:
+        containers:
+        - name: #@ mainContainerName(serviceName)
+          env:
+          - name: CONFIG_FILE_PATH
+            value: #@ CONFIG_FILE_DIR + "/" + CONFIG_FILE_NAME
+          image: #@ serviceImage(serviceName)
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: #@ serviceContainerRam(serviceName)
+            limits:
+              memory: #@ serviceContainerRam(serviceName)
+          volumeMounts:
+            - name: #@ CONFIG_VOLUME_NAME
+              mountPath: #@ CONFIG_FILE_DIR
+        volumes:
+        - name: #@ CONFIG_VOLUME_NAME
+          downwardAPI:
+            items:
+              - path: #@ CONFIG_FILE_NAME
+                fieldRef:
+                  fieldPath: metadata.annotations['composedServiceConfig']
+#@ end
+
+#@ def mainContainerName(name):
+  #@ return "cnt-" + name
+#@ end
+
+#@ def a8rioAnnotations(name):
+  a8r.io/description: #@ "Deployment of service '{}'".format(name)
+  a8r.io/owner: "@me"
+#@ end
+
+#@ def addDatabaseConnectionProperties(withDb):
+  #@ dbProps = data.values.configs.db
+
+  # Providing a set of config keys like this requires special treatment at the place these keys are used
+  # It is done like this here to show an alternative way of providing a key with a multiline text value
+  elementList:
+  #@ if not withDb:
+  #@ else:
+  - #@ 'db.url=' + dbProps.url
+  - #@ 'db.username=' + dbProps.user
+  #! Password should of course come from a secret...
+  - #@ 'db.password=' + dbProps.password
+  #@ end
+#@ end
+
+#@ def serviceImage(serviceName):
+  #@ return data.values.general.registryBaseUrl + serviceName + ":" + getattr(getattr(data.values.services, serviceName), "version")
+#@ end
+
+#@ def serviceContainerRam(serviceName):
+  #@ return getattr(getattr(data.values.services, serviceName), "memory")
+#@ end
+
+#@ def getClientLogoPath(): 
+  #@ return data.values.general.cmsBaseUrl + partnerShortcut + "/" + data.values.configs.logoPathSuffix
+#@ end

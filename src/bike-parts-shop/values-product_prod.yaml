@@ -1,0 +1,14 @@
+#@data/values
+---
+
+general:
+  environment:
+    name: prod
+
+services:
+  frontend:
+    version: 1.4.19
+  orders:
+    version: 2.3.5
+  stock:
+    version: 1.5.4

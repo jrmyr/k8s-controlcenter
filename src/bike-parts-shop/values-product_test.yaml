@@ -1,0 +1,14 @@
+#@data/values
+---
+
+general:
+  environment:
+    name: test
+
+services:
+  frontend:
+    version: 1.5.0-SNAPSHOT
+  orders:
+    version: 2.4.0-SNAPSHOT
+  stock:
+    version: 1.6.0-SNAPSHOT

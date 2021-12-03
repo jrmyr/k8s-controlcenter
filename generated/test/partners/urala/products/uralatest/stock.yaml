@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stock
+  namespace: uralabpstest
+  labels:
+    partner: UwesRadladen
+    product: uralabpstest
+spec:
+  selector:
+    app: stock
+  ports:
+  - name: stock-port
+    targetPort: 8080
+    protocol: TCP
+    port: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dpl-stock
+  namespace: uralabpstest
+  labels:
+    partner: UwesRadladen
+    product: uralabpstest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stock
+  template:
+    metadata:
+      labels:
+        partner: UwesRadladen
+        product: uralabpstest
+      annotations:
+        a8r.io/description: Deployment of service 'stock'
+        a8r.io/owner: '@me'
+        composedServiceConfig: |
+          runtimeEnvironment=kubernetes
+          db.url=jdbc:postgresql://host:port/testdb
+          db.username=URALA_TEST
+          db.password=my-not-really-secret-secret
+    spec:
+      containers:
+      - name: cnt-stock
+        env:
+        - name: CONFIG_FILE_PATH
+          value: /app/config/config.properties
+        image: http://myregistry.net/services/stock:1.6.0-SNAPSHOT
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 128M
+          limits:
+            memory: 128M
+        volumeMounts:
+        - name: vlm-config
+          mountPath: /app/config
+      volumes:
+      - name: vlm-config
+        downwardAPI:
+          items:
+          - path: config.properties
+            fieldRef:
+              fieldPath: metadata.annotations['composedServiceConfig']

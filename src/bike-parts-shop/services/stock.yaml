@@ -1,0 +1,7 @@
+#@ load("@ytt:data", "data")
+#@ load("@k8syaml:main.lib.yaml", "createService", "createDeployment")
+
+#@ serviceName = "stock"
+
+--- #@ createService(serviceName, 8080)
+--- #@ createDeployment(serviceName, withDb=True)

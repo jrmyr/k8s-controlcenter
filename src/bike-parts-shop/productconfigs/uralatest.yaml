@@ -1,0 +1,17 @@
+#@data/values
+---
+
+product:
+  #@overlay/match missing_ok=True
+  partner:
+    name: UwesRadladen
+    shortcut: urala
+
+#@overlay/match missing_ok=True
+configs:
+  db:
+    user: URALA_TEST
+    password: "my-not-really-secret-secret"
+    url: jdbc:postgresql://host:port/testdb
+  logoPathSuffix: "uwesradladen.png"
+  maxOrderAmount: 249.90

@@ -1,0 +1,35 @@
+#
+# Commonly used methods, constants and variables; collected here for easy and single point reference
+#
+
+#@ load("@ytt:data", "data")
+#@ load("@ytt:template", "template")
+
+
+#
+# Variables
+#
+#@ partnerName = data.values.product.partner.name
+#@ partnerShortcut = data.values.product.partner.shortcut
+
+#@ productNameSuffix = "test" if 'test' == data.values.general.environment.name else ""
+#@ productName = partnerShortcut + data.values.product.shortcut + productNameSuffix
+#@ namespace = productName
+
+
+#
+# Methods
+#
+
+#@ def getLabels(app=None, component=None, loadBalancerNames=[]):
+  partner: #@ partnerName
+  product: #@ namespace 
+#@ end
+
+#@ def isTestEnvironment():
+  #@ return 'test' == data.values.general.environment.name
+#@ end
+
+#@ def isProdEnvironment():
+  #@ return 'prod' == data.values.general.environment.name
+#@ end
