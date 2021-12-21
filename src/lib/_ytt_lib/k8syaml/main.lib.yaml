@@ -72,6 +72,13 @@
               - path: #@ CONFIG_FILE_NAME
                 fieldRef:
                   fieldPath: metadata.annotations['composedServiceConfig']
+        #@ if withDb:
+        # Needed for some db connection libs to ensure a proper entropy
+        - name: urandom
+          hostPath:
+            path: /dev/urandom
+            type: File
+        #@ end
 #@ end
 
 #@ def mainContainerName(name):
