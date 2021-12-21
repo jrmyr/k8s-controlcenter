@@ -64,3 +64,7 @@ spec:
           - path: config.properties
             fieldRef:
               fieldPath: metadata.annotations['composedServiceConfig']
+      - name: urandom
+        hostPath:
+          path: /dev/urandom
+          type: File
